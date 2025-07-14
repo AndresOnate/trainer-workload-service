@@ -5,9 +5,7 @@ This project is a training management system that allows the administration of `
 ## Key Features
 
 1. **Services**:
-   - **Trainee Service**: Supports creating, updating, deleting, and selecting trainee profiles.
-   - **Trainer Service**: Supports creating, updating, and selecting trainer profiles.
-   - **Training Service**: Supports creating and selecting training profiles.
+
 
 2. **In-Memory Storage**:
    - Data is stored in an in-memory `java.util.Map`, with a separate namespace for each entity (`Trainee`, `Trainer`, `Training`).
