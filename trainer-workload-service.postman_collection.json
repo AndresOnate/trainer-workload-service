@@ -1,0 +1,116 @@
+{
+	"info": {
+		"_postman_id": "fd912636-885d-4c45-99ef-7b17d8095305",
+		"name": "trainer-workload-service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29974943",
+		"_collection_link": "https://exercises-6292.postman.co/workspace/Epam-~00dc4620-5026-4677-a92a-304e3fc8e35d/collection/29974943-fd912636-885d-4c45-99ef-7b17d8095305?action=share&source=collection_link&creator=29974943"
+	},
+	"item": [
+		{
+			"name": "Agregar carga de trabajo",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "transactionId",
+						"value": "123e4567-e89b-12d3-a456-426614174000"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"juan123\",\n    \"firstName\": \"Juan\",\n    \"lastName\": \"Pérez\",\n    \"isActive\": true,\n    \"trainingDate\": \"2025-07-20\",\n    \"trainingDuration\": 90,\n    \"actionType\": \"ADD\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/api/trainer-workload/update",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"trainer-workload",
+						"update"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Eliminar carga de trabajo",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "transactionId",
+						"value": "abcdefgh-1234-5678-9012-abcdefabcdef"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"juan123\",\n    \"firstName\": \"Juan\",\n    \"lastName\": \"Pérez\",\n    \"isActive\": true,\n    \"trainingDate\": \"2025-07-20\",\n    \"trainingDuration\": 90,\n    \"actionType\": \"DELETE\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/api/trainer-workload/update",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"trainer-workload",
+						"update"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Consultar resumen de carga de un entrenador",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "transactionId",
+						"value": "789e1234-abcd-5678-efgh-1234567890ab"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/api/trainer-workload/summary/juan123",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"trainer-workload",
+						"summary",
+						"juan123"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

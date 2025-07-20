@@ -13,7 +13,7 @@ public class TrainerSummary {
     private String lastName;
     private Boolean trainerStatus; // Active status of the trainer
 
-    @OneToMany(mappedBy = "trainerSummary", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "trainerSummary", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<YearlySummary> years = new ArrayList<>(); 
 
     public TrainerSummary() {}
