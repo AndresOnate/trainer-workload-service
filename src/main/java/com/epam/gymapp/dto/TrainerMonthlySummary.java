@@ -9,7 +9,7 @@ public class TrainerMonthlySummary {
     private String trainerUsername;
     private String trainerFirstName;
     private String trainerLastName;
-    private Boolean trainerStatus; // IsActive
+    private Boolean trainerStatus;
     private List<YearSummary> years;
 
     public TrainerMonthlySummary() {

@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 public class MonthlySummary {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // Primary key for MonthlySummary
+    private Long id; 
 
     private int month;
     private Integer trainingSummaryDuration;

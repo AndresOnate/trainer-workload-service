@@ -10,7 +10,6 @@ public class YearSummary {
     public YearSummary(int year) {
         this.year = year;
         this.months = new ArrayList<>();
-        // Initialize all 12 months with 0 duration
         for (int i = 1; i <= 12; i++) {
             this.months.add(new MonthSummary(i, 0));
         }
@@ -36,6 +35,6 @@ public class YearSummary {
         return months.stream()
                 .filter(ms -> ms.getMonth() == month)
                 .findFirst()
-                .orElse(null); // Should not happen if initialized properly
+                .orElse(null); 
     }
 }

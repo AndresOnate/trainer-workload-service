@@ -1,4 +1,4 @@
-package com.epam.gymapp.exception;
+package com.epam.gymapp.exception.trainer;
 
 public class TrainerNotFoundException extends RuntimeException {
     public TrainerNotFoundException(String username) {

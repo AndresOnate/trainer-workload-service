@@ -8,8 +8,6 @@ import io.jsonwebtoken.Jwts;
 public class JwtUtils {
 
     private final String jwtSecret = "supersecretkey1234567890123456supersecretkey1234567890123456";
-    private final int jwtExpirationMs = 3600000; // 1 hora
-
 
     public String getUsernameFromJwt(String token) {
         return Jwts.parserBuilder()

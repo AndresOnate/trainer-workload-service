@@ -32,7 +32,7 @@ public class TrainerWorkloadController {
         TransactionContext.setTransactionId(transactionId);
 
         transactionLogger.info("[{}] Endpoint: POST /api/workload/update, Request: {}", transactionId, request.toString());
-        operationLogger.info("[{}] Processing trainer workload update for trainer: {}", transactionId, request.getTrainerUsername());
+        operationLogger.info("[{}] Processing trainer workload update for trainer: {}", transactionId, request.getUsername());
 
         try {
             trainerWorkloadService.updateTrainerWorkload(request);

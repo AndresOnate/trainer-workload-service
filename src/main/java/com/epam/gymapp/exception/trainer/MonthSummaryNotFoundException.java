@@ -1,4 +1,4 @@
-package com.epam.gymapp.exception;
+package com.epam.gymapp.exception.trainer;
 
 public class MonthSummaryNotFoundException extends RuntimeException {
     public MonthSummaryNotFoundException(String username, int year, int month) {

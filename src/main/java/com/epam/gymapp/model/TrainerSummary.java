@@ -6,41 +6,41 @@ import java.util.List;
 
 @Entity
 @Table(name = "trainer_summaries")
-public class TrainerSummary { // Renamed from TrainerMonthlySummary to avoid confusion with the request object
+public class TrainerSummary { 
     @Id
-    private String trainerUsername; // Trainer username as primary key
-    private String trainerFirstName;
-    private String trainerLastName;
-    private Boolean trainerStatus; // IsActive
+    private String username; 
+    private String firstName;
+    private String lastName;
+    private Boolean trainerStatus; // Active status of the trainer
 
     @OneToMany(mappedBy = "trainerSummary", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<YearlySummary> years = new ArrayList<>(); // Renamed to YearlySummary
+    private List<YearlySummary> years = new ArrayList<>(); 
 
     public TrainerSummary() {}
 
     // Getters and Setters
-    public String getTrainerUsername() {
-        return trainerUsername;
+    public String getUsername() {
+        return username;
     }
 
-    public void setTrainerUsername(String trainerUsername) {
-        this.trainerUsername = trainerUsername;
+    public void setUsername(String trainerUsername) {
+        this.username = trainerUsername;
     }
 
-    public String getTrainerFirstName() {
-        return trainerFirstName;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setTrainerFirstName(String trainerFirstName) {
-        this.trainerFirstName = trainerFirstName;
+    public void setFirstName(String trainerFirstName) {
+        this.firstName = trainerFirstName;
     }
 
-    public String getTrainerLastName() {
-        return trainerLastName;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setTrainerLastName(String trainerLastName) {
-        this.trainerLastName = trainerLastName;
+    public void setLastName(String trainerLastName) {
+        this.lastName = trainerLastName;
     }
 
     public Boolean getTrainerStatus() {

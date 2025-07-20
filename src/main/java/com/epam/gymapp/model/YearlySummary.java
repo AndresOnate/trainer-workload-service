@@ -9,7 +9,7 @@ import java.util.List;
 public class YearlySummary {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // Primary key for YearlySummary
+    private Long id; 
 
     private int year;
 
@@ -18,21 +18,19 @@ public class YearlySummary {
     private TrainerSummary trainerSummary;
 
     @OneToMany(mappedBy = "yearlySummary", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<MonthlySummary> months = new ArrayList<>(); // Renamed to MonthlySummary
+    private List<MonthlySummary> months = new ArrayList<>(); 
 
     public YearlySummary() {}
 
     public YearlySummary(int year) {
         this.year = year;
-        // Initialize all 12 months with 0 duration when a new YearlySummary is created
         for (int i = 1; i <= 12; i++) {
             MonthlySummary newMonth = new MonthlySummary(i, 0);
-            newMonth.setYearlySummary(this); // Set parent reference
+            newMonth.setYearlySummary(this); 
             this.months.add(newMonth);
         }
     }
-
-    // Getters and Setters
+    
     public Long getId() {
         return id;
     }
@@ -69,6 +67,6 @@ public class YearlySummary {
         return months.stream()
                 .filter(ms -> ms.getMonth() == month)
                 .findFirst()
-                .orElse(null); // Should always find if initialized correctly
+                .orElse(null); 
     }
 }

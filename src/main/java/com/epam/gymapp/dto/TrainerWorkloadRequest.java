@@ -2,41 +2,52 @@ package com.epam.gymapp.dto;
 
 
 import java.time.LocalDate;
-
 import com.epam.gymapp.model.ActionType;
 
 public class TrainerWorkloadRequest {
-    private String trainerUsername;
-    private String trainerFirstName;
-    private String trainerLastName;
+    private String username;
+    private String firstName;
+    private String lastName;
     private Boolean isActive;
     private LocalDate trainingDate;
-    private Integer trainingDuration; 
+    private Integer trainingDuration;
     private ActionType actionType;
 
+    public TrainerWorkloadRequest(String username, String firstName, String lastName,
+                                  Boolean isActive, LocalDate trainingDate,
+                                  Integer trainingDuration, ActionType actionType) {
+        this.username = username;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.isActive = isActive;
+        this.trainingDate = trainingDate;
+        this.trainingDuration = trainingDuration;
+        this.actionType = actionType;
+    }
+
     // Getters and Setters
-    public String getTrainerUsername() {
-        return trainerUsername;
+    public String getUsername() {
+        return username;
     }
 
-    public void setTrainerUsername(String trainerUsername) {
-        this.trainerUsername = trainerUsername;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public String getTrainerFirstName() {
-        return trainerFirstName;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setTrainerFirstName(String trainerFirstName) {
-        this.trainerFirstName = trainerFirstName;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
-    public String getTrainerLastName() {
-        return trainerLastName;
-        }
+    public String getLastName() {
+        return lastName;
+    }
 
-    public void setTrainerLastName(String trainerLastName) {
-        this.trainerLastName = trainerLastName;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public Boolean getIsActive() {
@@ -74,9 +85,9 @@ public class TrainerWorkloadRequest {
     @Override
     public String toString() {
         return "TrainerWorkloadRequest{" +
-               "trainerUsername='" + trainerUsername + '\'' +
-               ", trainerFirstName='" + trainerFirstName + '\'' +
-               ", trainerLastName='" + trainerLastName + '\'' +
+               "username='" + username + '\'' +
+               ", firstName='" + firstName + '\'' +
+               ", lastName='" + lastName + '\'' +
                ", isActive=" + isActive +
                ", trainingDate=" + trainingDate +
                ", trainingDuration=" + trainingDuration +
