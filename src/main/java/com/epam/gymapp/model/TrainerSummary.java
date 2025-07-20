@@ -13,12 +13,11 @@ public class TrainerSummary {
     private String lastName;
     private Boolean trainerStatus; // Active status of the trainer
 
-    @OneToMany(mappedBy = "trainerSummary", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "trainerSummary", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<YearlySummary> years = new ArrayList<>(); 
 
     public TrainerSummary() {}
 
-    // Getters and Setters
     public String getUsername() {
         return username;
     }

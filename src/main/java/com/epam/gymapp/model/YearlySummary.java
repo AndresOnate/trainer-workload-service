@@ -11,24 +11,20 @@ public class YearlySummary {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; 
 
+    @Column(name = "summary_year")
     private int year;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "trainer_username", nullable = false)
+    @JoinColumn(name = "trainer_username", referencedColumnName = "username", nullable = false)
     private TrainerSummary trainerSummary;
 
-    @OneToMany(mappedBy = "yearlySummary", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "yearlySummary", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MonthlySummary> months = new ArrayList<>(); 
 
     public YearlySummary() {}
 
     public YearlySummary(int year) {
         this.year = year;
-        for (int i = 1; i <= 12; i++) {
-            MonthlySummary newMonth = new MonthlySummary(i, 0);
-            newMonth.setYearlySummary(this); 
-            this.months.add(newMonth);
-        }
     }
     
     public Long getId() {

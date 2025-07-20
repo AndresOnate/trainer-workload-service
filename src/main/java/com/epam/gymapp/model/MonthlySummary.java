@@ -9,7 +9,8 @@ public class MonthlySummary {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; 
-
+    
+    @Column(name = "month_number")
     private int month;
     private Integer trainingSummaryDuration;
 
@@ -24,7 +25,6 @@ public class MonthlySummary {
         this.trainingSummaryDuration = trainingSummaryDuration;
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

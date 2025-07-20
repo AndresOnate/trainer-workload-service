@@ -14,7 +14,7 @@ import com.epam.gymapp.util.TransactionContext;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/workload")
+@RequestMapping("/api/trainer-workload")
 public class TrainerWorkloadController {
 
     private static final Logger transactionLogger = LoggerFactory.getLogger("transactionLogger");

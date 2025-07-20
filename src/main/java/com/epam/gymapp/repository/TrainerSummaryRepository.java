@@ -9,5 +9,5 @@ import java.util.Optional;
 
 @Repository
 public interface TrainerSummaryRepository extends JpaRepository<TrainerSummary, String> {
-    Optional<TrainerSummary> findByTrainerUsername(String trainerUsername);
+    Optional<TrainerSummary> findByUsername(String trainerUsername);
 }
