@@ -19,7 +19,10 @@ import com.epam.gymapp.model.TrainerSummary;
 import com.epam.gymapp.model.YearlySummary;
 import com.epam.gymapp.repository.TrainerSummaryRepository;
 import com.epam.gymapp.util.TransactionContext;
+
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 
 
@@ -116,37 +119,47 @@ public class TrainerWorkloadService {
 
 
     @Transactional(readOnly = true)
-    public TrainerMonthlySummary getTrainerMonthlySummary(String username, int year, int month) {
+    public TrainerMonthlySummary getTrainerSummary(String username, Integer year, Integer month) {
         String transactionId = TransactionContext.getTransactionId();
-        operationLogger.info("[{}] Retrieving monthly summary for trainer: {} for {}-{}", transactionId, username, year, month);
+        operationLogger.info("[{}] Retrieving summary for trainer: {}, year: {}, month: {}", transactionId, username, year, month);
 
         TrainerSummary trainerSummary = trainerSummaryRepository.findByUsername(username)
                 .orElseThrow(() -> new TrainerNotFoundException(username));
 
-        YearlySummary yearlySummary = trainerSummary.getYears().stream()
-                .filter(ys -> ys.getYear() == year)
-                .findFirst()
-                .orElseThrow(() -> new YearSummaryNotFoundException(username, year));
+        TrainerMonthlySummary response = new TrainerMonthlySummary();
+        response.setUsername(trainerSummary.getUsername());
+        response.setFirstName(trainerSummary.getFirstName());
+        response.setLastName(trainerSummary.getLastName());
+        response.setStatus(trainerSummary.getTrainerStatus());
 
-        MonthlySummary monthlySummary = yearlySummary.getMonths().stream()
-                .filter(ms -> ms.getMonth() == month)
-                .findFirst()
-                .orElseThrow(() -> new MonthSummaryNotFoundException(username, year, month));
+        List<YearSummary> dtoYears = new ArrayList<>();
 
-        TrainerMonthlySummary responseSummary = new TrainerMonthlySummary();
-        responseSummary.setTrainerUsername(trainerSummary.getUsername());
-        responseSummary.setTrainerFirstName(trainerSummary.getFirstName());
-        responseSummary.setTrainerLastName(trainerSummary.getLastName());
-        responseSummary.setTrainerStatus(trainerSummary.getTrainerStatus());
+        for (YearlySummary ys : trainerSummary.getYears()) {
+            if (year != null && ys.getYear() != year) continue;
 
-        YearSummary dtoYearSummary = new YearSummary(year);
-        MonthSummary dtoMonthSummary = new MonthSummary(month, monthlySummary.getTrainingSummaryDuration());
+            List<MonthSummary> dtoMonths = new ArrayList<>();
+            for (MonthlySummary ms : ys.getMonths()) {
+                if (month != null && ms.getMonth() != month) continue;
+                dtoMonths.add(new MonthSummary(ms.getMonth(), ms.getTrainingSummaryDuration()));
+            }
 
-        dtoYearSummary.setMonths(Collections.singletonList(dtoMonthSummary));
-        responseSummary.setYears(Collections.singletonList(dtoYearSummary));
+            if (!dtoMonths.isEmpty()) {
+                YearSummary dtoYear = new YearSummary(ys.getYear());
+                dtoYear.setMonths(dtoMonths);
+                dtoYears.add(dtoYear);
+            }
+        }
 
-        operationLogger.info("[{}] Successfully retrieved monthly summary for trainer {} for {}-{}", transactionId, username, year, month);
+        if (dtoYears.isEmpty()) {
+            if (year != null && month != null)
+                throw new MonthSummaryNotFoundException(username, year, month);
+            if (year != null)
+                throw new YearSummaryNotFoundException(username, year);
+        }
 
-        return responseSummary;
+        response.setYears(dtoYears);
+        operationLogger.info("[{}] Successfully retrieved summary for trainer: {}, year: {}, month: {}", transactionId, username, year, month);
+
+        return response;
     }
 }

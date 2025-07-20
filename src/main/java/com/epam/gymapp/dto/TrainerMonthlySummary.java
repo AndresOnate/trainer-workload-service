@@ -6,47 +6,46 @@ import java.util.List;
 import java.util.Objects;
 
 public class TrainerMonthlySummary {
-    private String trainerUsername;
-    private String trainerFirstName;
-    private String trainerLastName;
-    private Boolean trainerStatus;
+    private String username;
+    private String firstName;
+    private String lastName;
+    private Boolean status;
     private List<YearSummary> years;
 
     public TrainerMonthlySummary() {
         this.years = new ArrayList<>();
     }
 
-    // Getters and Setters
-    public String getTrainerUsername() {
-        return trainerUsername;
+    public String getUsername() {
+        return username;
     }
 
-    public void setTrainerUsername(String trainerUsername) {
-        this.trainerUsername = trainerUsername;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public String getTrainerFirstName() {
-        return trainerFirstName;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setTrainerFirstName(String trainerFirstName) {
-        this.trainerFirstName = trainerFirstName;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
-    public String getTrainerLastName() {
-        return trainerLastName;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setTrainerLastName(String trainerLastName) {
-        this.trainerLastName = trainerLastName;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
-    public Boolean getTrainerStatus() {
-        return trainerStatus;
+    public Boolean getStatus() {
+        return status;
     }
 
-    public void setTrainerStatus(Boolean trainerStatus) {
-        this.trainerStatus = trainerStatus;
+    public void setStatus(Boolean status) {
+        this.status = status;
     }
 
     public List<YearSummary> getYears() {
@@ -73,11 +72,11 @@ public class TrainerMonthlySummary {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TrainerMonthlySummary that = (TrainerMonthlySummary) o;
-        return Objects.equals(trainerUsername, that.trainerUsername);
+        return Objects.equals(username, that.username);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(trainerUsername);
+        return Objects.hash(username);
     }
 }

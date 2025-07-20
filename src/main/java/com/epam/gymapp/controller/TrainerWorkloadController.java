@@ -43,26 +43,26 @@ public class TrainerWorkloadController {
         }
     }
 
-    @GetMapping("/summary/{username}/{year}/{month}")
-    public ResponseEntity<?> getTrainerMonthlySummary(
+    @GetMapping("/summary/{username}")
+    public ResponseEntity<?> getTrainerSummary(
             @PathVariable String username,
-            @PathVariable int year,
-            @PathVariable int month) {
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month) {
 
         String transactionId = UUID.randomUUID().toString();
         TransactionContext.setTransactionId(transactionId);
 
-        transactionLogger.info("[{}] Endpoint: GET /api/workload/summary/{}/{}/{}, Request Params: username={}, year={}, month={}",
-                transactionId, username, year, month, username, year, month);
-        operationLogger.info("[{}] Fetching monthly summary for trainer: {} for {}-{}", transactionId, username, year, month);
+        transactionLogger.info("[{}] Endpoint: GET /api/workload/summary/{}, Request Params: username={}, year={}, month={}",
+                transactionId, username, username, year, month);
 
         try {
-            TrainerMonthlySummary summary = trainerWorkloadService.getTrainerMonthlySummary(username, year, month);
+            TrainerMonthlySummary summary = trainerWorkloadService.getTrainerSummary(username, year, month);
             transactionLogger.info("[{}] Response: 200 OK, Message: Successfully retrieved summary.", transactionId);
             return ResponseEntity.ok(summary);
         } finally {
             TransactionContext.clearTransactionId();
         }
     }
+
 
 }
