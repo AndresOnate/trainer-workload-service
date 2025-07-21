@@ -10,7 +10,6 @@ public class MonthSummary {
         this.trainingSummaryDuration = trainingSummaryDuration;
     }
 
-    // Getters and Setters
     public int getMonth() {
         return month;
     }
