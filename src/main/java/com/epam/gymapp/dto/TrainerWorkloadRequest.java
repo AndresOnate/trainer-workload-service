@@ -1,10 +1,10 @@
 package com.epam.gymapp.dto;
 
 
+import java.io.Serializable;
 import java.time.LocalDate;
-import com.epam.gymapp.model.ActionType;
 
-public class TrainerWorkloadRequest {
+public class TrainerWorkloadRequest implements Serializable {
     private String username;
     private String firstName;
     private String lastName;
@@ -23,6 +23,10 @@ public class TrainerWorkloadRequest {
         this.trainingDate = trainingDate;
         this.trainingDuration = trainingDuration;
         this.actionType = actionType;
+    }
+
+    public TrainerWorkloadRequest() {
+        // Default constructor for serialization
     }
 
     // Getters and Setters
