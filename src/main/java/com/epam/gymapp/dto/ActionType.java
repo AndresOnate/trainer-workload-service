@@ -1,4 +1,4 @@
-package com.epam.gymapp.model;
+package com.epam.gymapp.dto;
 
 public enum ActionType {
     ADD,
