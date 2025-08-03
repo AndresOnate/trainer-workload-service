@@ -64,7 +64,6 @@ public class TrainerSummary {
                 .findFirst()
                 .orElseGet(() -> {
                     YearlySummary newYearSummary = new YearlySummary(year);
-                    newYearSummary.setTrainerSummary(this); // Set parent reference
                     years.add(newYearSummary);
                     return newYearSummary;
                 });

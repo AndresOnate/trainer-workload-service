@@ -37,104 +37,87 @@ public class TrainerWorkloadService {
         this.trainerSummaryRepository = trainerSummaryRepository;
     }
 
-    @Transactional
     public void updateTrainerWorkload(TrainerWorkloadRequest request) {
         String transactionId = TransactionContext.getTransactionId();
         operationLogger.info("[{}] Starting update for trainer: {} with action: {}", transactionId, request.getUsername(), request.getActionType());
 
-        TrainerSummary trainerSummary = getOrCreateTrainerSummary(request);
-        trainerSummary.setTrainerStatus(request.getIsActive());
+        TrainerSummary trainer = trainerSummaryRepository.findByUsername(request.getUsername())
+                .orElseGet(() -> {
+                    operationLogger.info("[{}] Creating new summary entry for trainer: {}", transactionId, request.getUsername());
+                    TrainerSummary t = new TrainerSummary();
+                    t.setUsername(request.getUsername());
+                    t.setFirstName(request.getFirstName());
+                    t.setLastName(request.getLastName());
+                    t.setTrainerStatus(request.getIsActive());
+                    return t;
+                });
 
-        YearlySummary yearlySummary = associateYearlySummary(trainerSummary, request.getTrainingDate().getYear());
-        MonthlySummary monthlySummary = getOrCreateMonthlySummary(yearlySummary, request.getTrainingDate().getMonthValue());
+        trainer.setTrainerStatus(request.getIsActive());
 
-        updateMonthlyDuration(transactionId, monthlySummary, request);
+        YearlySummary yearly = trainer.getYears().stream()
+                .filter(y -> y.getYear() == request.getTrainingDate().getYear())
+                .findFirst()
+                .orElseGet(() -> {
+                    YearlySummary y = new YearlySummary();
+                    y.setYear(request.getTrainingDate().getYear());
+                    trainer.getYears().add(y);
+                    return y;
+                });
 
-        trainerSummaryRepository.save(trainerSummary);
+        MonthlySummary monthly = yearly.getMonths().stream()
+                .filter(m -> m.getMonth() == request.getTrainingDate().getMonthValue())
+                .findFirst()
+                .orElseGet(() -> {
+                    MonthlySummary m = new MonthlySummary();
+                    m.setMonth(request.getTrainingDate().getMonthValue());
+                    m.setTrainingSummaryDuration(0);
+                    yearly.getMonths().add(m);
+                    return m;
+                });
+
+        updateMonthlyDuration(transactionId, monthly, request);
+
+        trainerSummaryRepository.save(trainer);
         operationLogger.info("[{}] Successfully updated workload for trainer: {}", transactionId, request.getUsername());
     }
 
-    private TrainerSummary getOrCreateTrainerSummary(TrainerWorkloadRequest request) {
-    return trainerSummaryRepository.findByUsername(request.getUsername())
-            .orElseGet(() -> {
-                operationLogger.info("[{}] Creating new summary entry for trainer: {}", TransactionContext.getTransactionId(), request.getUsername());
-                TrainerSummary ts = new TrainerSummary();
-                ts.setUsername(request.getUsername());
-                ts.setFirstName(request.getFirstName());
-                ts.setLastName(request.getLastName());
-                return ts;
-            });
-    }
-
-    private YearlySummary associateYearlySummary(TrainerSummary trainerSummary, int year) {
-        YearlySummary yearlySummary = trainerSummary.getYearSummary(year);
-
-        if (yearlySummary.getTrainerSummary() == null) {
-            yearlySummary.setTrainerSummary(trainerSummary);
-            if (!trainerSummary.getYears().contains(yearlySummary)) {
-                trainerSummary.getYears().add(yearlySummary);
-            }
-        }
-
-        return yearlySummary;
-    }
-
-    private MonthlySummary getOrCreateMonthlySummary(YearlySummary yearlySummary, int month) {
-        String transactionId = TransactionContext.getTransactionId();
-        MonthlySummary monthlySummary = yearlySummary.getMonthSummary(month);
-
-        if (monthlySummary == null) {
-            String username = yearlySummary.getTrainerSummary().getUsername();
-            operationLogger.info("[{}] Monthly summary not found, creating for trainer {} in {}-{}", transactionId, username, yearlySummary.getYear(), month);
-
-            monthlySummary = new MonthlySummary(month, 0);
-            monthlySummary.setYearlySummary(yearlySummary);
-            yearlySummary.getMonths().add(monthlySummary);
-        }
-
-        return monthlySummary;
-    }
-
-    private void updateMonthlyDuration(String transactionId, MonthlySummary monthlySummary, TrainerWorkloadRequest request) {
-        int currentDuration = monthlySummary.getTrainingSummaryDuration();
-        int durationChange = request.getTrainingDuration();
-        int newDuration;
+    private void updateMonthlyDuration(String transactionId, MonthlySummary monthly, TrainerWorkloadRequest request) {
+        int current = monthly.getTrainingSummaryDuration() != null ? monthly.getTrainingSummaryDuration() : 0;
+        int change = request.getTrainingDuration();
+        int updated;
 
         switch (request.getActionType()) {
             case ADD:
-                newDuration = currentDuration + durationChange;
+                updated = current + change;
                 break;
             case DELETE:
-                newDuration = Math.max(0, currentDuration - durationChange);
+                updated = Math.max(0, current - change);
                 break;
             default:
                 throw new InvalidActionTypeException(request.getActionType().name());
         }
 
-        monthlySummary.setTrainingSummaryDuration(newDuration);
+        monthly.setTrainingSummaryDuration(updated);
         operationLogger.info("[{}] Updated trainer {} for {}-{}: new total duration = {}", transactionId,
-                request.getUsername(), request.getTrainingDate().getYear(), request.getTrainingDate().getMonthValue(), newDuration);
+                request.getUsername(), request.getTrainingDate().getYear(), request.getTrainingDate().getMonthValue(), updated);
     }
 
-
-
-    @Transactional(readOnly = true)
     public TrainerMonthlySummary getTrainerSummary(String username, Integer year, Integer month) {
         String transactionId = TransactionContext.getTransactionId();
         operationLogger.info("[{}] Retrieving summary for trainer: {}, year: {}, month: {}", transactionId, username, year, month);
 
-        TrainerSummary trainerSummary = trainerSummaryRepository.findByUsername(username)
+        TrainerSummary trainer = trainerSummaryRepository.findByUsername(username)
                 .orElseThrow(() -> new TrainerNotFoundException(username));
 
         TrainerMonthlySummary response = new TrainerMonthlySummary();
-        response.setUsername(trainerSummary.getUsername());
-        response.setFirstName(trainerSummary.getFirstName());
-        response.setLastName(trainerSummary.getLastName());
-        response.setStatus(trainerSummary.getTrainerStatus());
+        response.setUsername(trainer.getUsername());
+        response.setFirstName(trainer.getFirstName());
+        response.setLastName(trainer.getLastName());
+        response.setStatus(trainer.getTrainerStatus());
 
         List<YearSummary> dtoYears = new ArrayList<>();
 
-        for (YearlySummary ys : trainerSummary.getYears()) {
+        for (YearlySummary ys : trainer.getYears()) {
             if (year != null && ys.getYear() != year) continue;
 
             List<MonthSummary> dtoMonths = new ArrayList<>();
