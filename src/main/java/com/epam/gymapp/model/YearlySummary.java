@@ -1,24 +1,12 @@
 package com.epam.gymapp.model;
 
-import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "yearly_summaries")
+
 public class YearlySummary {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; 
 
-    @Column(name = "summary_year")
     private int year;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "trainer_username", referencedColumnName = "username", nullable = false)
-    private TrainerSummary trainerSummary;
-
-    @OneToMany(mappedBy = "yearlySummary", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MonthlySummary> months = new ArrayList<>(); 
 
     public YearlySummary() {}
@@ -27,28 +15,12 @@ public class YearlySummary {
         this.year = year;
     }
     
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public int getYear() {
         return year;
     }
 
     public void setYear(int year) {
         this.year = year;
-    }
-
-    public TrainerSummary getTrainerSummary() {
-        return trainerSummary;
-    }
-
-    public void setTrainerSummary(TrainerSummary trainerSummary) {
-        this.trainerSummary = trainerSummary;
     }
 
     public List<MonthlySummary> getMonths() {

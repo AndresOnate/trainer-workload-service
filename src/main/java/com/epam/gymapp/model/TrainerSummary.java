@@ -3,9 +3,9 @@ package com.epam.gymapp.model;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
-@Table(name = "trainer_summaries")
+@Document(collection = "trainer_summaries")
 public class TrainerSummary { 
     @Id
     private String username; 
@@ -13,7 +13,6 @@ public class TrainerSummary {
     private String lastName;
     private Boolean trainerStatus; // Active status of the trainer
 
-    @OneToMany(mappedBy = "trainerSummary", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<YearlySummary> years = new ArrayList<>(); 
 
     public TrainerSummary() {}
