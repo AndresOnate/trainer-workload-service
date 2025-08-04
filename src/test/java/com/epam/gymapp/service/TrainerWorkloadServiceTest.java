@@ -72,9 +72,7 @@ public class TrainerWorkloadServiceTest {
 
         YearlySummary year = new YearlySummary(2023);
         MonthlySummary month = new MonthlySummary(3, 30);
-        month.setYearlySummary(year);
         year.getMonths().add(month);
-        year.setTrainerSummary(summary);
         summary.getYears().add(year);
 
         when(trainerSummaryRepository.findByUsername("user2")).thenReturn(Optional.of(summary));
@@ -98,7 +96,6 @@ public class TrainerWorkloadServiceTest {
         summary.setTrainerStatus(true);
 
         YearlySummary year = new YearlySummary(2024);
-        year.setTrainerSummary(summary);
         year.getMonths().add(new MonthlySummary(1, 120));
         summary.getYears().add(year);
 
@@ -118,11 +115,9 @@ public class TrainerWorkloadServiceTest {
 
         YearlySummary y2023 = new YearlySummary(2023);
         y2023.getMonths().add(new MonthlySummary(4, 50));
-        y2023.setTrainerSummary(summary);
 
         YearlySummary y2024 = new YearlySummary(2024);
         y2024.getMonths().add(new MonthlySummary(5, 70));
-        y2024.setTrainerSummary(summary);
 
         summary.getYears().addAll(List.of(y2023, y2024));
 
@@ -159,7 +154,6 @@ public class TrainerWorkloadServiceTest {
         TrainerSummary summary = new TrainerSummary();
         summary.setUsername("user6");
         YearlySummary year = new YearlySummary(2023);
-        year.setTrainerSummary(summary);
         summary.getYears().add(year);
 
         when(trainerSummaryRepository.findByUsername("user6")).thenReturn(Optional.of(summary));
