@@ -70,7 +70,7 @@ public class TrainerWorkloadService {
                 .orElseGet(() -> {
                     MonthlySummary m = new MonthlySummary();
                     m.setMonth(request.getTrainingDate().getMonthValue());
-                    m.setTrainingSummaryDuration(0);
+                    m.setTrainingSummaryDuration(request.getTrainingDuration());
                     yearly.getMonths().add(m);
                     return m;
                 });
