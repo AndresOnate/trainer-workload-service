@@ -3,9 +3,12 @@ package com.epam.gymapp.model;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "trainer_summaries")
+@CompoundIndex(name = "first_last_name_idx", def = "{'firstName': 1, 'lastName': 1}")
 public class TrainerSummary { 
     @Id
     private String username; 

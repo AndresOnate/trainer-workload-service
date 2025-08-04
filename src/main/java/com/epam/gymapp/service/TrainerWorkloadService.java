@@ -4,7 +4,6 @@ package com.epam.gymapp.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.epam.gymapp.dto.MonthSummary;
 import com.epam.gymapp.dto.TrainerMonthlySummary;
@@ -21,7 +20,6 @@ import com.epam.gymapp.repository.TrainerSummaryRepository;
 import com.epam.gymapp.util.TransactionContext;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 
