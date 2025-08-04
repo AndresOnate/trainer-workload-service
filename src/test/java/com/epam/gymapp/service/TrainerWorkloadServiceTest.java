@@ -16,12 +16,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.epam.gymapp.dto.ActionType;
 import com.epam.gymapp.dto.TrainerMonthlySummary;
 import com.epam.gymapp.dto.TrainerWorkloadRequest;
 import com.epam.gymapp.exception.trainer.MonthSummaryNotFoundException;
 import com.epam.gymapp.exception.trainer.TrainerNotFoundException;
 import com.epam.gymapp.exception.trainer.YearSummaryNotFoundException;
-import com.epam.gymapp.model.ActionType;
 import com.epam.gymapp.model.MonthlySummary;
 import com.epam.gymapp.model.TrainerSummary;
 import com.epam.gymapp.model.YearlySummary;
