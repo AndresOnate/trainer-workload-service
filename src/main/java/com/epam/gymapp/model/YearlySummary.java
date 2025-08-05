@@ -3,10 +3,14 @@ package com.epam.gymapp.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.validation.constraints.Min;
+
 
 public class YearlySummary {
 
+    @Min(value = 1900, message = "Year must be a valid year")
     private int year;
+    
     private List<MonthlySummary> months = new ArrayList<>(); 
 
     public YearlySummary() {}

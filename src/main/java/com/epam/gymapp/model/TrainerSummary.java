@@ -7,16 +7,27 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 @Document(collection = "trainer_summaries")
 @CompoundIndex(name = "first_last_name_idx", def = "{'firstName': 1, 'lastName': 1}")
 public class TrainerSummary { 
     
     @Id
+    @NotBlank(message = "Username is required")
     private String username; 
-    private String firstName;
-    private String lastName;
-    private Boolean trainerStatus; // Active status of the trainer
 
+    @NotBlank(message = "First name is required")
+    private String firstName;
+
+    @NotBlank(message = "Last name is required")
+    private String lastName;
+
+    @NotNull(message = "Trainer status is required")
+    private Boolean trainerStatus;
+
+    @NotNull(message = "Years list cannot be null")
     private List<YearlySummary> years = new ArrayList<>(); 
 
     public TrainerSummary() {}
