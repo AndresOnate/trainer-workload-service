@@ -7,6 +7,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -28,6 +29,7 @@ public class TrainerSummary {
     private Boolean trainerStatus;
 
     @NotNull(message = "Years list cannot be null")
+    @Valid
     private List<YearlySummary> years = new ArrayList<>(); 
 
     public TrainerSummary() {}
