@@ -26,10 +26,8 @@ public class TrainerWorkloadRequest implements Serializable {
     }
 
     public TrainerWorkloadRequest() {
-        // Default constructor for serialization
     }
 
-    // Getters and Setters
     public String getUsername() {
         return username;
     }
