@@ -52,26 +52,8 @@ public class TrainerWorkloadService {
 
         trainer.setTrainerStatus(request.getIsActive());
 
-        YearlySummary yearly = trainer.getYears().stream()
-                .filter(y -> y.getYear() == request.getTrainingDate().getYear())
-                .findFirst()
-                .orElseGet(() -> {
-                    YearlySummary y = new YearlySummary();
-                    y.setYear(request.getTrainingDate().getYear());
-                    trainer.getYears().add(y);
-                    return y;
-                });
-
-        MonthlySummary monthly = yearly.getMonths().stream()
-                .filter(m -> m.getMonth() == request.getTrainingDate().getMonthValue())
-                .findFirst()
-                .orElseGet(() -> {
-                    MonthlySummary m = new MonthlySummary();
-                    m.setMonth(request.getTrainingDate().getMonthValue());
-                    m.setTrainingSummaryDuration(0);
-                    yearly.getMonths().add(m);
-                    return m;
-                });
+        YearlySummary yearly = findOrCreateYear(trainer, request.getTrainingDate().getYear());
+        MonthlySummary monthly = findOrCreateMonth(yearly, request.getTrainingDate().getMonthValue());
 
         updateMonthlyDuration(transactionId, monthly, request);
 
@@ -142,5 +124,30 @@ public class TrainerWorkloadService {
         operationLogger.info("[{}] Successfully retrieved summary for trainer: {}, year: {}, month: {}", transactionId, username, year, month);
 
         return response;
+    }
+
+    private YearlySummary findOrCreateYear(TrainerSummary trainer, int year) {
+    return trainer.getYears().stream()
+        .filter(y -> y.getYear() == year)
+        .findFirst()
+        .orElseGet(() -> {
+            YearlySummary y = new YearlySummary();
+            y.setYear(year);
+            trainer.getYears().add(y);
+            return y;
+        });
+}
+
+    private MonthlySummary findOrCreateMonth(YearlySummary yearly, int month) {
+        return yearly.getMonths().stream()
+            .filter(m -> m.getMonth() == month)
+            .findFirst()
+            .orElseGet(() -> {
+                MonthlySummary m = new MonthlySummary();
+                m.setMonth(month);
+                m.setTrainingSummaryDuration(0);
+                yearly.getMonths().add(m);
+                return m;
+            });
     }
 }

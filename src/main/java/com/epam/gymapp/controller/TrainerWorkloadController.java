@@ -11,6 +11,8 @@ import com.epam.gymapp.dto.TrainerWorkloadRequest;
 import com.epam.gymapp.service.TrainerWorkloadService;
 import com.epam.gymapp.util.TransactionContext;
 
+import jakarta.validation.Valid;
+
 import java.util.UUID;
 
 @RestController
@@ -27,7 +29,7 @@ public class TrainerWorkloadController {
     }
 
     @PostMapping("/update")
-    public ResponseEntity<String> updateTrainerWorkload(@RequestBody TrainerWorkloadRequest request) {
+    public ResponseEntity<String> updateTrainerWorkload(@Valid @RequestBody TrainerWorkloadRequest request) {
         String transactionId = UUID.randomUUID().toString();
         TransactionContext.setTransactionId(transactionId);
 
