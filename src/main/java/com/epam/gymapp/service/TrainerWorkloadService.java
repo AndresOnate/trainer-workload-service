@@ -22,6 +22,8 @@ import com.epam.gymapp.util.TransactionContext;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class TrainerWorkloadService {
@@ -66,15 +68,21 @@ public class TrainerWorkloadService {
     private void handleExistingMonth(String username, int year, int month, int change, ActionType actionType, String transactionId, MonthlySummary monthSummary) {
         int current = monthSummary.getTrainingSummaryDuration() != null ? monthSummary.getTrainingSummaryDuration() : 0;
         int updated;
-
         switch (actionType) {
             case ADD:
                 updated = current + change;
                 trainerSummaryRepository.setMonthlyDuration(username, year, month, change);
                 break;
             case DELETE:
-                updated = Math.max(0, current - change);
-                trainerSummaryRepository.setMonthlyDuration(username, year, month, updated);
+                if(current - change < 0){
+                    updated = 0;
+                    trainerSummaryRepository.setMonthlyDuration(username, year, month, -current);
+                }else{
+                    updated = current - change;
+                    trainerSummaryRepository.setMonthlyDuration(username, year, month, -change);
+
+                }
+                
                 break;
             default:
                 throw new InvalidActionTypeException(actionType.name());
@@ -128,38 +136,38 @@ public class TrainerWorkloadService {
         TrainerSummary trainer = trainerSummaryRepository.findByUsername(username)
                 .orElseThrow(() -> new TrainerNotFoundException(username));
 
+        List<YearSummary> filteredYears = trainer.getYears().stream()
+                .filter(ys -> year == null || ys.getYear() == year)
+                .map(ys -> {
+                    List<MonthSummary> filteredMonths = ys.getMonths().stream()
+                            .filter(ms -> month == null || ms.getMonth() == month)
+                            .map(ms -> new MonthSummary(ms.getMonth(), ms.getTrainingSummaryDuration()))
+                            .collect(Collectors.toList());
+
+                    if (filteredMonths.isEmpty()) return null;
+
+                    YearSummary dtoYear = new YearSummary(ys.getYear());
+                    dtoYear.setMonths(filteredMonths);
+                    return dtoYear;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        if (filteredYears.isEmpty()) {
+            if (year != null && month != null) {
+                throw new MonthSummaryNotFoundException(username, year, month);
+            } else if (year != null) {
+                throw new YearSummaryNotFoundException(username, year);
+            }
+        }
+
         TrainerMonthlySummary response = new TrainerMonthlySummary();
         response.setUsername(trainer.getUsername());
         response.setFirstName(trainer.getFirstName());
         response.setLastName(trainer.getLastName());
         response.setStatus(trainer.getTrainerStatus());
+        response.setYears(filteredYears);
 
-        List<YearSummary> dtoYears = new ArrayList<>();
-
-        for (YearlySummary ys : trainer.getYears()) {
-            if (year != null && ys.getYear() != year) continue;
-
-            List<MonthSummary> dtoMonths = new ArrayList<>();
-            for (MonthlySummary ms : ys.getMonths()) {
-                if (month != null && ms.getMonth() != month) continue;
-                dtoMonths.add(new MonthSummary(ms.getMonth(), ms.getTrainingSummaryDuration()));
-            }
-
-            if (!dtoMonths.isEmpty()) {
-                YearSummary dtoYear = new YearSummary(ys.getYear());
-                dtoYear.setMonths(dtoMonths);
-                dtoYears.add(dtoYear);
-            }
-        }
-
-        if (dtoYears.isEmpty()) {
-            if (year != null && month != null)
-                throw new MonthSummaryNotFoundException(username, year, month);
-            if (year != null)
-                throw new YearSummaryNotFoundException(username, year);
-        }
-
-        response.setYears(dtoYears);
         operationLogger.info("[{}] Successfully retrieved summary for trainer: {}, year: {}, month: {}", transactionId, username, year, month);
 
         return response;

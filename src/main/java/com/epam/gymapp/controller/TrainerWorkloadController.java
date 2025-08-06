@@ -65,6 +65,4 @@ public class TrainerWorkloadController {
             TransactionContext.clearTransactionId();
         }
     }
-
-
 }
