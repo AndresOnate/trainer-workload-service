@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.epam.gymapp.dto.ActionType;
 import com.epam.gymapp.dto.MonthSummary;
 import com.epam.gymapp.dto.TrainerMonthlySummary;
 import com.epam.gymapp.dto.TrainerWorkloadRequest;
@@ -22,8 +23,6 @@ import com.epam.gymapp.util.TransactionContext;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
 @Service
 public class TrainerWorkloadService {
 
@@ -39,47 +38,87 @@ public class TrainerWorkloadService {
         String transactionId = TransactionContext.getTransactionId();
         operationLogger.info("[{}] Starting update for trainer: {} with action: {}", transactionId, request.getUsername(), request.getActionType());
 
-        TrainerSummary trainer = trainerSummaryRepository.findByUsername(request.getUsername())
-                .orElseGet(() -> {
-                    operationLogger.info("[{}] Creating new summary entry for trainer: {}", transactionId, request.getUsername());
-                    TrainerSummary t = new TrainerSummary();
-                    t.setUsername(request.getUsername());
-                    t.setFirstName(request.getFirstName());
-                    t.setLastName(request.getLastName());
-                    t.setTrainerStatus(request.getIsActive());
-                    return t;
-                });
+        String username = request.getUsername();
+        int year = request.getTrainingDate().getYear();
+        int month = request.getTrainingDate().getMonthValue();
+        int change = request.getTrainingDuration();
+        ActionType actionType = request.getActionType();
 
-        trainer.setTrainerStatus(request.getIsActive());
-
-        YearlySummary yearly = findOrCreateYear(trainer, request.getTrainingDate().getYear());
-        MonthlySummary monthly = findOrCreateMonth(yearly, request.getTrainingDate().getMonthValue());
-
-        updateMonthlyDuration(transactionId, monthly, request);
-
-        trainerSummaryRepository.save(trainer);
-        operationLogger.info("[{}] Successfully updated workload for trainer: {}", transactionId, request.getUsername());
+        trainerSummaryRepository.findByUsername(username)
+            .ifPresentOrElse(
+                trainer -> handleExistingTrainer(trainer, actionType, year, month, change, transactionId),
+                () -> handleNewTrainer(request, actionType, transactionId)
+            );
     }
 
-    private void updateMonthlyDuration(String transactionId, MonthlySummary monthly, TrainerWorkloadRequest request) {
-        int current = monthly.getTrainingSummaryDuration() != null ? monthly.getTrainingSummaryDuration() : 0;
-        int change = request.getTrainingDuration();
+    private void handleExistingTrainer(TrainerSummary trainer, ActionType actionType, int year, int month, int change, String transactionId) {
+        String username = trainer.getUsername();
+        YearlySummary yearSummary = trainer.getYearSummary(year);
+        MonthlySummary monthSummary = yearSummary.getMonthSummary(month);
+
+        if (monthSummary != null) {
+            handleExistingMonth(username, year, month, change, actionType, transactionId, monthSummary);
+        } else {
+            handleMissingMonth(trainer, yearSummary, month, change, actionType, transactionId);
+        }
+    }
+
+    private void handleExistingMonth(String username, int year, int month, int change, ActionType actionType, String transactionId, MonthlySummary monthSummary) {
+        int current = monthSummary.getTrainingSummaryDuration() != null ? monthSummary.getTrainingSummaryDuration() : 0;
         int updated;
 
-        switch (request.getActionType()) {
+        switch (actionType) {
             case ADD:
                 updated = current + change;
+                trainerSummaryRepository.setMonthlyDuration(username, year, month, change);
                 break;
             case DELETE:
                 updated = Math.max(0, current - change);
+                trainerSummaryRepository.setMonthlyDuration(username, year, month, updated);
                 break;
             default:
-                throw new InvalidActionTypeException(request.getActionType().name());
+                throw new InvalidActionTypeException(actionType.name());
         }
 
-        monthly.setTrainingSummaryDuration(updated);
-        operationLogger.info("[{}] Updated trainer {} for {}-{}: new total duration = {}", transactionId,
-                request.getUsername(), request.getTrainingDate().getYear(), request.getTrainingDate().getMonthValue(), updated);
+        operationLogger.info("[{}] Updated trainer {} for {}-{}: new total duration = {}", transactionId, username, year, month, updated);
+    }
+
+    private void handleMissingMonth(TrainerSummary trainer, YearlySummary yearSummary, int month, int change, ActionType actionType, String transactionId) {
+        String username = trainer.getUsername();
+        int year = yearSummary.getYear();
+        if (actionType == ActionType.ADD) {
+            yearSummary.getMonths().add(new MonthlySummary(month, change));
+            trainerSummaryRepository.save(trainer);
+            operationLogger.info("[{}] Added new month summary for trainer: {}, year: {}, month: {}", transactionId, username, year, month);
+        } else {
+            operationLogger.warn("[{}] Cannot DELETE: No existing summary for trainer: {}, year: {}, month: {}", transactionId, username, year, month);
+            throw new MonthSummaryNotFoundException(username, year, month);
+        }
+    }
+
+    private void handleNewTrainer(TrainerWorkloadRequest request, ActionType actionType, String transactionId) {
+        if (actionType == ActionType.ADD) {
+            TrainerSummary newTrainer = creatTrainerSummary(request);
+            trainerSummaryRepository.save(newTrainer);
+            operationLogger.info("[{}] Created new trainer and added summary: {}", transactionId, request.getUsername());
+        } else {
+            operationLogger.warn("[{}] Cannot DELETE: Trainer not found: {}", transactionId, request.getUsername());
+            throw new TrainerNotFoundException(request.getUsername());
+        }
+    }
+
+    private TrainerSummary creatTrainerSummary(TrainerWorkloadRequest request) {
+        TrainerSummary trainer = new TrainerSummary();
+        trainer.setUsername(request.getUsername());
+        trainer.setFirstName(request.getFirstName());
+        trainer.setLastName(request.getLastName());
+        trainer.setTrainerStatus(request.getIsActive());
+
+        YearlySummary yearly = new YearlySummary(request.getTrainingDate().getYear());
+        MonthlySummary monthly = new MonthlySummary(request.getTrainingDate().getMonthValue(), request.getTrainingDuration());
+        yearly.getMonths().add(monthly);
+        trainer.getYears().add(yearly);
+        return trainer;
     }
 
     public TrainerMonthlySummary getTrainerSummary(String username, Integer year, Integer month) {
@@ -126,28 +165,4 @@ public class TrainerWorkloadService {
         return response;
     }
 
-    private YearlySummary findOrCreateYear(TrainerSummary trainer, int year) {
-    return trainer.getYears().stream()
-        .filter(y -> y.getYear() == year)
-        .findFirst()
-        .orElseGet(() -> {
-            YearlySummary y = new YearlySummary();
-            y.setYear(year);
-            trainer.getYears().add(y);
-            return y;
-        });
-}
-
-    private MonthlySummary findOrCreateMonth(YearlySummary yearly, int month) {
-        return yearly.getMonths().stream()
-            .filter(m -> m.getMonth() == month)
-            .findFirst()
-            .orElseGet(() -> {
-                MonthlySummary m = new MonthlySummary();
-                m.setMonth(month);
-                m.setTrainingSummaryDuration(0);
-                yearly.getMonths().add(m);
-                return m;
-            });
-    }
 }
