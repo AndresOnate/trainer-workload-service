@@ -22,6 +22,9 @@ public class TrainingListener {
     public void procesarMensaje(TrainerWorkloadRequest dto) {
         listenerLogger.info("Processing workload for trainer: {}", dto.getTrainingDuration());
         try {
+            if (dto.getUsername() == null || dto.getActionType() == null) {
+                throw new IllegalArgumentException("Missing required fields in message");
+            }
             trainerWorkloadService.updateTrainerWorkload(dto);
             listenerLogger.info("Successfully processed workload for trainer: {}", dto.getUsername());
         } catch (Exception e) {

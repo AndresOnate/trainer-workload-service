@@ -1,19 +1,35 @@
 package com.epam.gymapp.model;
 
-import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "trainer_summaries")
-public class TrainerSummary { 
-    @Id
-    private String username; 
-    private String firstName;
-    private String lastName;
-    private Boolean trainerStatus; // Active status of the trainer
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-    @OneToMany(mappedBy = "trainerSummary", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+@Document(collection = "trainer_summaries")
+@CompoundIndex(name = "first_last_name_idx", def = "{'firstName': 1, 'lastName': 1}")
+public class TrainerSummary { 
+    
+    @Id
+    @NotBlank(message = "Username is required")
+    private String username; 
+
+    @NotBlank(message = "First name is required")
+    private String firstName;
+
+    @NotBlank(message = "Last name is required")
+    private String lastName;
+
+    @NotNull(message = "Trainer status is required")
+    private Boolean trainerStatus;
+
+    @NotNull(message = "Years list cannot be null")
+    @Valid
     private List<YearlySummary> years = new ArrayList<>(); 
 
     public TrainerSummary() {}
@@ -65,7 +81,6 @@ public class TrainerSummary {
                 .findFirst()
                 .orElseGet(() -> {
                     YearlySummary newYearSummary = new YearlySummary(year);
-                    newYearSummary.setTrainerSummary(this); // Set parent reference
                     years.add(newYearSummary);
                     return newYearSummary;
                 });
