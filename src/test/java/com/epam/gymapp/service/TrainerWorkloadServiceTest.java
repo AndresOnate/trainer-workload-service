@@ -1,10 +1,15 @@
 package com.epam.gymapp.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.epam.gymapp.dto.ActionType;
 import com.epam.gymapp.dto.TrainerMonthlySummary;
 import com.epam.gymapp.dto.TrainerWorkloadRequest;
+import com.epam.gymapp.exception.common.InvalidActionTypeException;
 import com.epam.gymapp.exception.trainer.MonthSummaryNotFoundException;
 import com.epam.gymapp.exception.trainer.TrainerNotFoundException;
 import com.epam.gymapp.exception.trainer.YearSummaryNotFoundException;
@@ -36,6 +42,15 @@ public class TrainerWorkloadServiceTest {
 
     @InjectMocks
     private TrainerWorkloadService trainerWorkloadService;
+
+    private final LocalDate trainingDate = LocalDate.of(2025, 8, 1);
+
+    private TrainerWorkloadRequest buildRequest(ActionType action) {
+        return new TrainerWorkloadRequest(
+                "jdoe", "John", "Doe", true,
+                trainingDate, 2, action
+        );
+    }
 
     @BeforeEach
     void setUp() {
@@ -62,34 +77,8 @@ public class TrainerWorkloadServiceTest {
         assertEquals(60, saved.getYearSummary(2024).getMonthSummary(5).getTrainingSummaryDuration());
     }
 
+
     @Test
-    void testUpdateTrainerWorkload_DeleteAction_ReduceToZero() {
-        TrainerSummary summary = new TrainerSummary();
-        summary.setUsername("user2");
-        summary.setFirstName("Jane");
-        summary.setLastName("Smith");
-        summary.setTrainerStatus(true);
-
-        YearlySummary year = new YearlySummary(2023);
-        MonthlySummary month = new MonthlySummary(3, 30);
-        month.setYearlySummary(year);
-        year.getMonths().add(month);
-        year.setTrainerSummary(summary);
-        summary.getYears().add(year);
-
-        when(trainerSummaryRepository.findByUsername("user2")).thenReturn(Optional.of(summary));
-
-        TrainerWorkloadRequest request = new TrainerWorkloadRequest(
-                "user2", "Jane", "Smith", true,
-                LocalDate.of(2023, 3, 15), 30, ActionType.DELETE
-        );
-
-        trainerWorkloadService.updateTrainerWorkload(request);
-
-        assertEquals(0, summary.getYearSummary(2023).getMonthSummary(3).getTrainingSummaryDuration());
-    }
-
-        @Test
     void testGetTrainerSummary_AllData() {
         TrainerSummary summary = new TrainerSummary();
         summary.setUsername("user3");
@@ -98,7 +87,6 @@ public class TrainerWorkloadServiceTest {
         summary.setTrainerStatus(true);
 
         YearlySummary year = new YearlySummary(2024);
-        year.setTrainerSummary(summary);
         year.getMonths().add(new MonthlySummary(1, 120));
         summary.getYears().add(year);
 
@@ -118,11 +106,9 @@ public class TrainerWorkloadServiceTest {
 
         YearlySummary y2023 = new YearlySummary(2023);
         y2023.getMonths().add(new MonthlySummary(4, 50));
-        y2023.setTrainerSummary(summary);
 
         YearlySummary y2024 = new YearlySummary(2024);
         y2024.getMonths().add(new MonthlySummary(5, 70));
-        y2024.setTrainerSummary(summary);
 
         summary.getYears().addAll(List.of(y2023, y2024));
 
@@ -159,12 +145,165 @@ public class TrainerWorkloadServiceTest {
         TrainerSummary summary = new TrainerSummary();
         summary.setUsername("user6");
         YearlySummary year = new YearlySummary(2023);
-        year.setTrainerSummary(summary);
         summary.getYears().add(year);
 
         when(trainerSummaryRepository.findByUsername("user6")).thenReturn(Optional.of(summary));
 
         assertThrows(MonthSummaryNotFoundException.class, () ->
                 trainerWorkloadService.getTrainerSummary("user6", 2023, 5));
+    }
+
+
+        @Test
+    void shouldCreateNewTrainerWhenNotExists() {
+        TrainerWorkloadRequest request = buildRequest(ActionType.ADD);
+
+        when(trainerSummaryRepository.findByUsername("jdoe")).thenReturn(Optional.empty());
+
+        trainerWorkloadService.updateTrainerWorkload(request);
+
+        verify(trainerSummaryRepository).save(any(TrainerSummary.class));
+    }
+
+    @Test
+    void shouldUpdateExistingTrainerWorkload() {
+        TrainerWorkloadRequest request = buildRequest(ActionType.ADD);
+
+        MonthlySummary monthly = new MonthlySummary(8, 3);
+        YearlySummary yearly = new YearlySummary(2025);
+        yearly.getMonths().add(monthly);
+
+        TrainerSummary trainer = new TrainerSummary();
+        trainer.setUsername("jdoe");
+        trainer.setYears(List.of(yearly));
+
+        when(trainerSummaryRepository.findByUsername("jdoe")).thenReturn(Optional.of(trainer));
+
+        trainerWorkloadService.updateTrainerWorkload(request);
+
+        verify(trainerSummaryRepository).setMonthlyDuration("jdoe", 2025, 8, 2);
+    }
+
+    @Test
+    void shouldHandleDeleteActionCorrectly() {
+        TrainerWorkloadRequest request = buildRequest(ActionType.DELETE);
+
+        MonthlySummary monthly = new MonthlySummary(8, 5);
+        YearlySummary yearly = new YearlySummary(2025);
+        yearly.getMonths().add(monthly);
+
+        TrainerSummary trainer = new TrainerSummary();
+        trainer.setUsername("jdoe");
+        trainer.setYears(List.of(yearly));
+
+        when(trainerSummaryRepository.findByUsername("jdoe")).thenReturn(Optional.of(trainer));
+
+        trainerWorkloadService.updateTrainerWorkload(request);
+
+        verify(trainerSummaryRepository).setMonthlyDuration("jdoe", 2025, 8, -2);
+    }
+
+
+    @Test
+    void shouldThrowExceptionWhenDeletingNonExistingTrainer() {
+        TrainerWorkloadRequest request = buildRequest(ActionType.DELETE);
+
+        when(trainerSummaryRepository.findByUsername("jdoe")).thenReturn(Optional.empty());
+
+        assertThrows(TrainerNotFoundException.class, () -> {
+            trainerWorkloadService.updateTrainerWorkload(request);
+        });
+    }
+
+    @Test
+    void shouldThrowMonthSummaryNotFoundOnDeleteWhenMonthMissing() {
+        TrainerWorkloadRequest request = buildRequest(ActionType.DELETE);
+
+        YearlySummary yearly = new YearlySummary(2025);
+        TrainerSummary trainer = new TrainerSummary();
+        trainer.setUsername("jdoe");
+        trainer.setYears(List.of(yearly));
+
+        when(trainerSummaryRepository.findByUsername("jdoe")).thenReturn(Optional.of(trainer));
+
+        assertThrows(MonthSummaryNotFoundException.class, () -> {
+            trainerWorkloadService.updateTrainerWorkload(request);
+        });
+    }
+
+    @Test
+    void shouldReturnTrainerSummaryByYearAndMonth() {
+        MonthlySummary ms = new MonthlySummary(8, 5);
+        YearlySummary ys = new YearlySummary(2025);
+        ys.getMonths().add(ms);
+
+        TrainerSummary trainer = new TrainerSummary();
+        trainer.setUsername("jdoe");
+        trainer.setFirstName("John");
+        trainer.setLastName("Doe");
+        trainer.setTrainerStatus(true);
+        trainer.setYears(List.of(ys));
+
+        when(trainerSummaryRepository.findByUsername("jdoe")).thenReturn(Optional.of(trainer));
+
+        TrainerMonthlySummary summary = trainerWorkloadService.getTrainerSummary("jdoe", 2025, 8);
+
+        assertEquals("jdoe", summary.getUsername());
+        assertEquals(1, summary.getYears().size());
+        assertEquals(1, summary.getYears().get(0).getMonths().size());
+    }
+
+    @Test
+    void shouldThrowMonthSummaryNotFoundException() {
+        YearlySummary ys = new YearlySummary(2025);
+        ys.setMonths(new ArrayList<>()); // no months
+
+        TrainerSummary trainer = new TrainerSummary();
+        trainer.setUsername("jdoe");
+        trainer.setYears(List.of(ys));
+
+        when(trainerSummaryRepository.findByUsername("jdoe")).thenReturn(Optional.of(trainer));
+
+        assertThrows(MonthSummaryNotFoundException.class, () ->
+                trainerWorkloadService.getTrainerSummary("jdoe", 2025, 8));
+    }
+
+    @Test
+    void shouldThrowYearSummaryNotFoundException() {
+        TrainerSummary trainer = new TrainerSummary();
+        trainer.setUsername("jdoe");
+        trainer.setYears(List.of());
+
+        when(trainerSummaryRepository.findByUsername("jdoe")).thenReturn(Optional.of(trainer));
+
+        assertThrows(YearSummaryNotFoundException.class, () ->
+                trainerWorkloadService.getTrainerSummary("jdoe", 2025, null));
+    }
+
+    @Test
+    void shouldHandleConcurrentUpdates() throws InterruptedException {
+        TrainerWorkloadRequest request = buildRequest(ActionType.ADD);
+
+        MonthlySummary monthly = new MonthlySummary(8, 1);
+        YearlySummary yearly = new YearlySummary(2025);
+        yearly.getMonths().add(monthly);
+
+        TrainerSummary trainer = new TrainerSummary();
+        trainer.setUsername("jdoe");
+        trainer.setYears(List.of(yearly));
+
+        when(trainerSummaryRepository.findByUsername("jdoe")).thenReturn(Optional.of(trainer));
+
+        Runnable task = () -> trainerWorkloadService.updateTrainerWorkload(request);
+
+        Thread t1 = new Thread(task);
+        Thread t2 = new Thread(task);
+
+        t1.start();
+        t2.start();
+        t1.join();
+        t2.join();
+
+        verify(trainerSummaryRepository, atLeastOnce()).setMonthlyDuration(eq("jdoe"), eq(2025), eq(8), anyInt());
     }
 }

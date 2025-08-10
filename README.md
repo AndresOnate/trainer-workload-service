@@ -8,7 +8,7 @@ Este microservicio gestiona la carga de trabajo de entrenadores, incluyendo la a
 - Spring Boot
 - Spring Web
 - Spring Data JPA
-- H2 Database (solo desarrollo)
+- MongoDB
 - Maven
 ## 📦 Endpoints
 
@@ -100,4 +100,8 @@ trainer-workload-service/
 
 **transactionLogger**: para registrar las transacciones con ID único por solicitud.
 **operationLogger**: para registrar operaciones internas específicas como lógica de negocio.
+
+## 5. Ejemplo vista  MongoDB
+
+<img width="1379" height="688" alt="image" src="https://github.com/user-attachments/assets/038b0d8a-292b-4bb8-902b-b0fc668ae6e9" />
 
