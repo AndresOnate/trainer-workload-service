@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 @Document(collection = "trainer_summaries")
 @CompoundIndex(name = "first_last_name_idx", def = "{'firstName': 1, 'lastName': 1}")
@@ -17,6 +18,7 @@ public class TrainerSummary {
     
     @Id
     @NotBlank(message = "Username is required")
+    @Size(max = 30, message = "Username cannot exceed 30 characters")
     private String username; 
 
     @NotBlank(message = "First name is required")
