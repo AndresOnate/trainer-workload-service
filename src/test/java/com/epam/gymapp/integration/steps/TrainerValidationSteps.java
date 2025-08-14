@@ -1,14 +1,11 @@
-package com.epam.gymapp.integration;
+package com.epam.gymapp.integration.steps;
 
 
-import io.cucumber.java.Before;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Year;
 import java.util.Set;
-
-
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -17,10 +14,7 @@ import io.cucumber.spring.CucumberContextConfiguration;
 import com.epam.gymapp.model.MonthlySummary;
 import com.epam.gymapp.model.TrainerSummary;
 import com.epam.gymapp.model.YearlySummary;
-import com.epam.gymapp.utils.NoSecurityConfig;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -28,10 +22,8 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 
 @CucumberContextConfiguration
-@AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@Import(NoSecurityConfig.class)
 public class TrainerValidationSteps {
 
     private TrainerSummary trainer;

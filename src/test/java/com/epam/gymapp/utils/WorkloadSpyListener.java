@@ -1,4 +1,4 @@
-package com.epam.gymapp.integration;
+package com.epam.gymapp.utils;
 
 import com.epam.gymapp.dto.TrainerWorkloadRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;

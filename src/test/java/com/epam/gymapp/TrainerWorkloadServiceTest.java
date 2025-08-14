@@ -1,4 +1,4 @@
-package com.epam.gymapp.service;
+package com.epam.gymapp;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,7 +24,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.epam.gymapp.dto.ActionType;
 import com.epam.gymapp.dto.TrainerMonthlySummary;
 import com.epam.gymapp.dto.TrainerWorkloadRequest;
-import com.epam.gymapp.exception.common.InvalidActionTypeException;
 import com.epam.gymapp.exception.trainer.MonthSummaryNotFoundException;
 import com.epam.gymapp.exception.trainer.TrainerNotFoundException;
 import com.epam.gymapp.exception.trainer.YearSummaryNotFoundException;
@@ -32,6 +31,7 @@ import com.epam.gymapp.model.MonthlySummary;
 import com.epam.gymapp.model.TrainerSummary;
 import com.epam.gymapp.model.YearlySummary;
 import com.epam.gymapp.repository.TrainerSummaryRepository;
+import com.epam.gymapp.service.TrainerWorkloadService;
 import com.epam.gymapp.util.TransactionContext;
 
 @ExtendWith(MockitoExtension.class)

@@ -1,12 +1,14 @@
-package com.epam.gymapp.integration;
+package com.epam.gymapp.service;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.awaitility.Awaitility;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,6 +31,11 @@ class TrainingListenerIntegrationTest {
     @Autowired
     private TrainerSummaryRepository trainerSummaryRepository;
 
+    @BeforeEach
+    void setUp() {
+        trainerSummaryRepository.deleteAll();
+    }
+
     @Test
     void shouldReceiveMessageAndUpdateDatabase() {
         TrainerWorkloadRequest request = new TrainerWorkloadRequest();
@@ -46,5 +53,6 @@ class TrainingListenerIntegrationTest {
             assertTrue(trainer.isPresent());
             assertEquals(90, (int) trainer.get().getYears().get(0).getMonths().get(0).getTrainingSummaryDuration());
         });
+
     }
 }
