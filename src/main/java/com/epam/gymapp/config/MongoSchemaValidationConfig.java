@@ -1,23 +1,14 @@
 package com.epam.gymapp.config;
 
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.model.ValidationAction;
-import com.mongodb.client.model.ValidationOptions;
-
-import java.util.List;
-
 import org.bson.Document;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.CollectionOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import jakarta.annotation.PostConstruct;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import org.springframework.data.mongodb.core.schema.JsonSchemaProperty;
 import org.springframework.data.mongodb.core.schema.MongoJsonSchema;
 import org.springframework.data.mongodb.core.schema.TypedJsonSchemaObject;
 import org.springframework.data.mongodb.core.schema.JsonSchemaObject;
-import org.springframework.data.mongodb.core.schema.JsonSchemaObject.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
